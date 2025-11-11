@@ -2,42 +2,33 @@ import { JWT_SECRET } from "../config/env.js";
 import jwt from "jsonwebtoken";
 import User from "../models/user.Model.js";
 
-//
 const authorize = async (req, res, next) => {
   try {
-    let token;
+    const authHeader = req.headers.authorization;
 
-    if (
-      req.headers.authorization &&
-      req.headers.authorization.startsWith("Bearer")
-    ) {
-      token = req.headers.authorization.split(" ")[1];
-    }
-
-    // if the not the right token
-    if (!token) {
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    // if the actuals token
+    const token = authHeader.split(" ")[1];
+
+    // Verify JWT
     const decoded = jwt.verify(token, JWT_SECRET);
 
+    // Find user
     const user = await User.findById(decoded.userId);
-
     if (!user) {
-      res.status(401).json({
-        message: "Unauthorized",
-      });
+      return res.status(401).json({ message: "Unauthorized" });
     }
 
-    // once we got ther user  we store it inside req.user
+    // Attach user to request
     req.user = user;
     next();
-
-    //
   } catch (error) {
-    res.status(401).json({ message: "unAuthorized", error: error.message });
-    next(error);
+    return res
+      .status(401)
+      .json({ message: "Unauthorized", error: error.message });
   }
 };
+
 export default authorize;

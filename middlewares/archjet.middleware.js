@@ -2,7 +2,11 @@ import aj from "../config/arcjet.js";
 
 const arcjetMiddleWare = async (req, res, next) => {
   try {
-    const decision = await aj.protect(req, { requested: 1 });
+    const decision = await aj.protect(req, {
+      requested: 1,
+      // provide IP manually if missing
+      ip: req.ip || req.headers["x-forwarded-for"] || "127.0.0.1",
+    });
 
     // guards
     if (decision.isDenied()) {
@@ -11,7 +15,7 @@ const arcjetMiddleWare = async (req, res, next) => {
       if (decision.reason.isBot())
         return res.status(403).json({ error: "Bot detected" });
 
-      res.status(403).json({ error: "Access denied" });
+      return res.status(403).json({ error: "Access denied" });
     }
 
     next();
@@ -20,4 +24,5 @@ const arcjetMiddleWare = async (req, res, next) => {
     next(error);
   }
 };
+
 export default arcjetMiddleWare;
