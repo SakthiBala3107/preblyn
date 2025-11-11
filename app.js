@@ -7,6 +7,7 @@ import { PORT } from "./config/env.js";
 import cookieParser from "cookie-parser";
 import errorMiddlerWare from "./middlewares/error.middleware.js";
 import arcjetMiddleWare from "./middlewares/archjet.middleware.js";
+import workFlowRouter from "./routes/workflow.routes.js";
 
 const app = express();
 
@@ -18,11 +19,12 @@ app.use(urlencoded({ extended: false }));
 app.use(arcjetMiddleWare);
 
 // route-middlewares
-const instance = "/api/v1";
+const INSTANCE = "/api/v1";
 //
-app.use(`${instance}/auth`, authRouter);
-app.use(`${instance}/users`, userRouter);
-app.use(`${instance}/subscriptions`, subscriptionRouter);
+app.use(`${INSTANCE}/auth`, authRouter);
+app.use(`${INSTANCE}/users`, userRouter);
+app.use(`${INSTANCE}/subscriptions`, subscriptionRouter);
+app.use(`${INSTANCE}/workflow`, workFlowRouter);
 
 // error-middleWares
 app.use(errorMiddlerWare);
